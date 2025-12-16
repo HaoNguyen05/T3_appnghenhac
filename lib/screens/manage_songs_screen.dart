@@ -165,18 +165,21 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
                 await library.addSong(newSong);
 
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   final notifService = context.read<NotificationService>();
                   await notifService.sendNotification(
                     title: 'Bài hát mới: ${newSong.title}',
                     message: 'Tác giả: ${newSong.artist ?? 'Unknown'}',
                   );
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(context);
                 }
               } else {
                 await library.updateSong(newSong);
-              }
-
-              if (mounted) {
-                Navigator.pop(context);
+                if (mounted) {
+                  Navigator.pop(
+                      context); // ignore: use_build_context_synchronously
+                }
               }
             },
             child: const Text('Lưu'),
@@ -200,9 +203,8 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
           TextButton(
               onPressed: () async {
                 await library.deleteSong(songId);
-                if (mounted) {
-                  Navigator.pop(context);
-                }
+                Navigator.pop(
+                    context); // ignore: use_build_context_synchronously
               },
               child: const Text('Xóa')),
         ],
