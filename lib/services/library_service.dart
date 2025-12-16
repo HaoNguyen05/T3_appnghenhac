@@ -26,8 +26,9 @@ class LibraryService extends ChangeNotifier {
   Future<void> fetchSongs({String? genreId}) async {
     try {
       var query = _client.from('songs').select();
-      if (genreId != null && genreId.isNotEmpty)
+      if (genreId != null && genreId.isNotEmpty) {
         query = query.eq('genre_id', genreId);
+      }
       final res = await query.order('title').limit(1000);
       songs = (res as List)
           .map((e) => Song.fromMap(Map<String, dynamic>.from(e)))
@@ -48,7 +49,7 @@ class LibraryService extends ChangeNotifier {
         'audio_url': song.audioUrl,
         'cover_url': song.coverUrl,
       }).select();
-      if (res != null && (res as List).isNotEmpty) {
+      if ((res as List).isNotEmpty) {
         songs.add(Song.fromMap(Map<String, dynamic>.from(res.first)));
       }
       notifyListeners();

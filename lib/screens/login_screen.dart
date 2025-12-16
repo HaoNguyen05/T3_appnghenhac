@@ -24,15 +24,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => loading = true);
     try {
-      final auth = Provider.of<AuthService>(context, listen: false);
+      final auth = context.read<AuthService>();
       await auth.signIn(emailCtrl.text.trim(), passCtrl.text.trim());
-      if (context.mounted) {
+      if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đăng nhập thất bại: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đăng nhập thất bại: $e')),
+        );
+      }
     } finally {
       setState(() => loading = false);
     }

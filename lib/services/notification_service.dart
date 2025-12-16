@@ -14,12 +14,10 @@ class NotificationService extends ChangeNotifier {
           .select()
           .order('created_at', ascending: false);
 
-      if (res != null) {
-        notifications = List<Map<String, dynamic>>.from(res)
-            .map((e) => NotificationItem.fromMap(e))
-            .toList();
-        notifyListeners();
-      }
+      notifications = List<Map<String, dynamic>>.from(res)
+          .map((e) => NotificationItem.fromMap(e))
+          .toList();
+      notifyListeners();
     } catch (e) {
       debugPrint('Lỗi fetchNotifications: $e');
     }

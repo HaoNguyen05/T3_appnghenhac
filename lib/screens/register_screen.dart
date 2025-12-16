@@ -47,15 +47,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final auth = Provider.of<AuthService>(context, listen: false);
       await auth.signUp(emailCtrl.text.trim(), passCtrl.text.trim(),
           name: nameCtrl.text.trim());
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Đăng ký thành công — vui lòng đăng nhập')));
-      if (context.mounted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Đăng ký thành công — vui lòng đăng nhập')));
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đăng ký thất bại: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đăng ký thất bại: $e')),
+        );
+      }
     } finally {
       setState(() => loading = false);
     }

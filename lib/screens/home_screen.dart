@@ -9,7 +9,6 @@ import '../widgets/mini_player.dart';
 import '../screens/player_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/notifications_screen.dart';
-import '../models/song.dart';
 import '../services/notification_service.dart';
 import 'profile_screen.dart';
 
@@ -28,19 +27,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     Future.microtask(() async {
-      final lib = Provider.of<LibraryService>(context, listen: false);
-      final auth = Provider.of<AuthService>(context, listen: false);
-      final history = Provider.of<HistoryService>(context, listen: false);
-      final notifService =
-          Provider.of<NotificationService>(context, listen: false);
+      if (mounted) {
+        final lib = Provider.of<LibraryService>(context, listen: false);
+        final auth = Provider.of<AuthService>(context, listen: false);
+        final history = Provider.of<HistoryService>(context, listen: false);
+        final notifService =
+            Provider.of<NotificationService>(context, listen: false);
 
-      await lib.fetchGenres();
-      await lib.fetchSongs();
-      await notifService.fetchNotifications();
+        await lib.fetchGenres();
+        await lib.fetchSongs();
+        await notifService.fetchNotifications();
 
-      if (auth.userId != null) {
-        history.setUser(auth.userId!);
-        await history.loadHistory();
+        if (auth.userId != null) {
+          history.setUser(auth.userId!);
+          await history.loadHistory();
+        }
       }
     });
   }
@@ -130,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                   blurRadius: 8)
                             ],
                           ),
@@ -156,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        Colors.black.withOpacity(0.7)
+                                        Colors.black.withValues(alpha: 0.7)
                                       ]),
                                 ),
                               ),
@@ -216,18 +217,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: () async {
                               await player.play(s);
                               await history.addToHistory(s.id);
-                              if (context.mounted)
+                              if (context.mounted) {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) => PlayerScreen(song: s)));
+                              }
                             },
                             onFavoriteTap: () {},
                           )),
                       const SizedBox(height: 28),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ),
         ],

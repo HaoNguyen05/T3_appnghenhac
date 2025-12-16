@@ -94,7 +94,7 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
                 decoration: const InputDecoration(labelText: 'Tác giả'),
               ),
               DropdownButtonFormField<String>(
-                value: selectedGenreId,
+                initialValue: selectedGenreId,
                 items: genres
                     .map((g) => DropdownMenuItem(
                           value: g.id,
@@ -116,7 +116,7 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
                       return const Text('Bucket audio chưa có file mp3');
                     }
                     return DropdownButtonFormField<String>(
-                      value: selectedAudio,
+                      initialValue: selectedAudio,
                       items: snapshot.data!
                           .map((f) => DropdownMenuItem(
                                 value: f,
@@ -140,10 +140,11 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
           TextButton(
             onPressed: () async {
               if (song == null && selectedAudio == null) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Vui lòng chọn file nhạc'),
-                ));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Vui lòng chọn file nhạc'),
+                  ));
+                }
                 return;
               }
 
@@ -163,19 +164,20 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
               if (song == null) {
                 await library.addSong(newSong);
 
-                if (!mounted) return; // bảo vệ BuildContext trước async
-                final notifService =
-                    Provider.of<NotificationService>(context, listen: false);
-                await notifService.sendNotification(
-                  title: 'Bài hát mới: ${newSong.title}',
-                  message: 'Tác giả: ${newSong.artist ?? 'Unknown'}',
-                );
+                if (mounted) {
+                  final notifService = context.read<NotificationService>();
+                  await notifService.sendNotification(
+                    title: 'Bài hát mới: ${newSong.title}',
+                    message: 'Tác giả: ${newSong.artist ?? 'Unknown'}',
+                  );
+                }
               } else {
                 await library.updateSong(newSong);
               }
 
-              if (!mounted) return;
-              Navigator.pop(context);
+              if (mounted) {
+                Navigator.pop(context);
+              }
             },
             child: const Text('Lưu'),
           ),
@@ -198,8 +200,9 @@ class _ManageSongsScreenState extends State<ManageSongsScreen> {
           TextButton(
               onPressed: () async {
                 await library.deleteSong(songId);
-                if (!mounted) return;
-                Navigator.pop(context);
+                if (mounted) {
+                  Navigator.pop(context);
+                }
               },
               child: const Text('Xóa')),
         ],
