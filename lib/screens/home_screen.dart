@@ -11,6 +11,8 @@ import '../screens/search_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../services/notification_service.dart';
 import 'profile_screen.dart';
+import 'profile_info_screen.dart';
+import '../models/user_profile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,14 +24,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentTab = 0;
   final searchCtrl = TextEditingController();
   bool _isDarkMode = true;
+  UserProfile? _userProfile;
+  late AuthService auth;
 
   @override
   void initState() {
     super.initState();
+    auth = Provider.of<AuthService>(context, listen: false);
+    auth.addListener(_onAuthChanged);
     Future.microtask(() async {
       if (mounted) {
         final lib = Provider.of<LibraryService>(context, listen: false);
-        final auth = Provider.of<AuthService>(context, listen: false);
         final history = Provider.of<HistoryService>(context, listen: false);
         final notifService =
             Provider.of<NotificationService>(context, listen: false);
@@ -41,9 +46,23 @@ class _HomeScreenState extends State<HomeScreen> {
         if (auth.userId != null) {
           history.setUser(auth.userId!);
           await history.loadHistory();
+          _userProfile = await auth.getUserProfileAsModel();
+          if (mounted) setState(() {});
         }
       }
     });
+  }
+
+  void _onAuthChanged() {
+    setState(() {
+      _userProfile = auth.userProfile;
+    });
+  }
+
+  @override
+  void dispose() {
+    auth.removeListener(_onAuthChanged);
+    super.dispose();
   }
 
   @override
@@ -85,10 +104,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () => setState(() => _isDarkMode = !_isDarkMode),
                   ),
                   const SizedBox(width: 8),
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundImage:
-                        NetworkImage('https://i.pravatar.cc/150?img=3'),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const ProfileInfoScreen()),
+                      );
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: _userProfile?.avatarUrl != null
+                          ? NetworkImage(_userProfile!.avatarUrl!)
+                          : const NetworkImage(
+                              'https://i.pravatar.cc/150?img=3'),
+                    ),
                   ),
                 ],
               ),

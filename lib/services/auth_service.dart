@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/user_profile.dart';
 
 class AuthService extends ChangeNotifier {
   final SupabaseClient _client = Supabase.instance.client;
   User? _user;
+  UserProfile? _userProfile;
 
   AuthService() {
     _user = _client.auth.currentUser;
@@ -17,6 +19,7 @@ class AuthService extends ChangeNotifier {
   User? get user => _user;
   String? get userId => _user?.id;
   bool get isAuthenticated => _user != null;
+  UserProfile? get userProfile => _userProfile;
   Future<void> signUp(
     String email,
     String password, {
@@ -63,6 +66,18 @@ class AuthService extends ChangeNotifier {
         .select()
         .eq('id', _user!.id)
         .maybeSingle();
+  }
+
+  Future<UserProfile?> getUserProfileAsModel() async {
+    final map = await getUserProfile();
+    if (map == null) return null;
+    _userProfile = UserProfile.fromMap(map);
+    return _userProfile;
+  }
+
+  void updateUserProfile(UserProfile profile) {
+    _userProfile = profile;
+    notifyListeners();
   }
 
   Future<bool> isAdmin() async {

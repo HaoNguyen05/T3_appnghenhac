@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Tài khoản'),
         backgroundColor: Colors.black,
       ),
       body: user == null
