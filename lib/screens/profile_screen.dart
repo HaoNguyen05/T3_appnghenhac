@@ -23,9 +23,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   List<Song> favoriteSongs = [];
   List<Song> historySongs = [];
+
   bool loading = false;
   bool showFavorites = false;
-
+  bool isAdminUser = false;
   @override
   void initState() {
     super.initState();
@@ -40,8 +41,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       fav.setUser(user.id);
       hist.setUser(user.id);
 
+      _checkAdmin(); // ⭐ kiểm tra role
       _loadAllData();
     }
+  }
+
+  Future<void> _checkAdmin() async {
+    final result = await auth.isAdmin();
+    if (!mounted) return;
+    setState(() => isAdminUser = result);
   }
 
   Future<void> _loadAllData() async {
@@ -84,21 +92,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: user == null
           ? const Center(
-              child:
-                  Text('Chưa đăng nhập', style: TextStyle(color: Colors.white)))
+              child: Text(
+                'Chưa đăng nhập',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
           : Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Email: ${user.email}',
-                      style: const TextStyle(color: Colors.white)),
+                  Text(
+                    'Email: ${user.email}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
                   const SizedBox(height: 8),
-                  Text('ID: ${user.id}',
-                      style: const TextStyle(color: Colors.white70)),
+                  Text(
+                    'ID: ${user.id}',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                   const SizedBox(height: 16),
 
-                  // Bài hát nghe gần đây
+                  // ===== LỊCH SỬ NGHE =====
                   const Text(
                     'Bài hát nghe gần đây',
                     style: TextStyle(
@@ -114,8 +129,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? const Center(child: CircularProgressIndicator())
                         : historySongs.isEmpty
                             ? const Center(
-                                child: Text('Chưa có lịch sử nghe',
-                                    style: TextStyle(color: Colors.white)))
+                                child: Text(
+                                  'Chưa có lịch sử nghe',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )
                             : ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: historySongs.length,
@@ -125,25 +143,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                               ),
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Nút quản lý bài hát
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.library_music, color: Colors.green),
-                    label: const Text('Quản lý bài hát'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white10,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  // ===== QUẢN LÝ BÀI HÁT (CHỈ ADMIN) =====
+                  if (isAdminUser)
+                    ElevatedButton.icon(
+                      icon:
+                          const Icon(Icons.library_music, color: Colors.green),
+                      label: const Text('Quản lý bài hát'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white10,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/manage_songs'),
                     ),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/manage_songs'),
-                  ),
+
                   const SizedBox(height: 16),
 
-                  // Nút xem bài hát yêu thích
+                  // ===== BÀI YÊU THÍCH =====
                   ElevatedButton.icon(
                     icon: const Icon(Icons.favorite, color: Colors.red),
                     label: const Text('Xem bài yêu thích'),
@@ -163,11 +185,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   if (showFavorites)
                     Expanded(
                       child: loading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
                           : favoriteSongs.isEmpty
                               ? const Center(
-                                  child: Text('Không có bài yêu thích',
-                                      style: TextStyle(color: Colors.white)))
+                                  child: Text(
+                                    'Không có bài yêu thích',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
                               : ListView.builder(
                                   itemCount: favoriteSongs.length,
                                   itemBuilder: (c, i) {
