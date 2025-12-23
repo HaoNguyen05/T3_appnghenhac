@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -11,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+
   bool loading = false;
   bool _showPassword = false;
 
@@ -23,20 +25,37 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => loading = true);
+
     try {
       final auth = context.read<AuthService>();
-      await auth.signIn(emailCtrl.text.trim(), passCtrl.text.trim());
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
+
+      await auth.signIn(
+        emailCtrl.text.trim(),
+        passCtrl.text.trim(),
+      );
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
+      String message = 'Đăng nhập thất bại';
+
+      final error = e.toString().toLowerCase();
+
+      if (error.contains('email not confirmed')) {
+        message = 'Tài khoản chưa xác nhận email';
+      } else if (error.contains('invalid login credentials')) {
+        message = 'Sai tài khoản hoặc mật khẩu';
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đăng nhập thất bại: $e')),
+          SnackBar(content: Text(message)),
         );
       }
     } finally {
-      setState(() => loading = false);
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
   }
 
@@ -51,7 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo & Title
                 Center(
                   child: Column(
                     children: [
@@ -89,111 +107,72 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 48),
 
-                // Email Field
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Email',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: emailCtrl,
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        hintText: 'Nhập email của bạn',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        filled: true,
-                        fillColor: const Color(0xFF1E1E1E),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white24),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white24),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Colors.deepPurple,
-                            width: 2,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.email,
-                          color: Colors.white54,
-                        ),
-                      ),
-                    ),
-                  ],
+                // Email
+                const Text(
+                  'Email',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: emailCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: 'Nhập email của bạn',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E1E),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.email, color: Colors.white54),
+                  ),
+                ),
+
                 const SizedBox(height: 20),
 
-                // Password Field
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Mật khẩu',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: passCtrl,
-                      style: const TextStyle(color: Colors.white),
-                      obscureText: !_showPassword,
-                      decoration: InputDecoration(
-                        hintText: 'Nhập mật khẩu',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        filled: true,
-                        fillColor: const Color(0xFF1E1E1E),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white24),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Colors.white24),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                            color: Colors.deepPurple,
-                            width: 2,
-                          ),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.lock,
-                          color: Colors.white54,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _showPassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.white54,
-                          ),
-                          onPressed: () =>
-                              setState(() => _showPassword = !_showPassword),
-                        ),
-                      ),
-                    ),
-                  ],
+                // Password
+                const Text(
+                  'Mật khẩu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: passCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(
+                    hintText: 'Nhập mật khẩu',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E1E),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white54),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _showPassword ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.white54,
+                      ),
+                      onPressed: () {
+                        setState(() => _showPassword = !_showPassword);
+                      },
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 32),
 
-                // Login Button
+                // Button
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -201,47 +180,35 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: loading ? null : _signIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
-                      disabledBackgroundColor: Colors.deepPurple.withValues(
-                        alpha: 0.5,
-                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                              strokeWidth: 2,
-                            ),
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
                           )
                         : const Text(
                             'Đăng nhập',
                             style: TextStyle(
-                              color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
 
-                // Register Link
                 Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
                         'Chưa có tài khoản? ',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pushNamed(context, '/register'),
@@ -249,7 +216,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Đăng ký',
                           style: TextStyle(
                             color: Colors.deepPurple,
-                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

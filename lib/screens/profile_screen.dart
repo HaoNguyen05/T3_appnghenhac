@@ -41,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       fav.setUser(user.id);
       hist.setUser(user.id);
 
-      _checkAdmin(); // ⭐ kiểm tra role
+      _checkAdmin();
       _loadAllData();
     }
   }
@@ -145,8 +145,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // ===== QUẢN LÝ BÀI HÁT (CHỈ ADMIN) =====
                   if (isAdminUser)
                     ElevatedButton.icon(
                       icon:
